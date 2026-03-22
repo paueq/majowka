@@ -435,6 +435,7 @@ listenToActivities();
         function deleteEntry(key) {
             if(confirm('Usunąć ' + key + '?')) db.ref('entries/' + key).remove();
         }
+        listenToActivities();
     </script>
 </body>
 </html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <title>System Zgłoszeń</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .hidden { display: none; }
+        .card { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+    <div id="home">
+        <h1>Witaj w systemie</h1>
+        <button onclick="showSection('form-section')">Formularz zgłoszeniowy</button>
+        <button onclick="showSection('admin-section')">Panel Admina</button>
+    </div>
+
+    <div id="form-section" class="hidden">
+        <h2>Formularz</h2>
+        <input type="text" id="name" placeholder="Imię i Nazwisko">
+        <button onclick="sendData()">Wyślij</button>
+        <button onclick="showSection('home')">Powrót</button>
+    </div>
+
+    <div id="admin-section" class="hidden">
+        <h2>Wszystkie zgłoszenia</h2>
+        <div id="list"></div>
+        <button onclick="showSection('home')">Powrót</button>
+    </div>
+
+    <script>
+        // TUTAJ wkleisz konfigurację ze swojego konta Firebase
+       const firebaseConfig = {
+  apiKey: "AIzaSyBfb2ZZVwFJsGisXCJi_NoCztqM9T-3jmo",
+  authDomain: "majowka-17460.firebaseapp.com",
+  databaseURL: "https://majowka-17460-default-rtdb.firebaseio.com",
+  projectId: "majowka-17460",
+  storageBucket: "majowka-17460.firebasestorage.app",
+  messagingSenderId: "782699449352",
+  appId: "1:782699449352:web:bf6f0a0a287ba45b3915bd",
+  measurementId: "G-TG5J9SRX0M"
+};
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function showSection(id) {
+            document.querySelectorAll('div').forEach(d => d.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            if(id === 'admin-section') loadData();
+        }
+
+        function sendData() {
+            const name = document.getElementById('name').value;
+            db.ref('entries').push({ name: name });
+            alert('Wysłano!');
+            showSection('home');
+        }
+
+        function loadData() {
+            db.ref('entries').on('value', (snapshot) => {
+                const list = document.getElementById('list');
+                list.innerHTML = '';
+                snapshot.forEach(child => {
+                    list.innerHTML += `<div class="card">${child.val().name}</div>`;
+                });
+            });
+        }
+    </script>
+</body>
+</html>

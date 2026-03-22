@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -108,6 +109,10 @@
         <span class="block text-2xl font-bold text-blue-600" id="stats-total">0</span>
         <span class="text-xs text-blue-400 uppercase font-bold">Wszystkich osób</span>
     </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
+    <h3 class="text-sm font-bold text-gray-500 uppercase mb-4 tracking-wider text-center">Obłożenie festiwalu (dni)</h3>
+    <canvas id="occupancyChart" width="400" height="200"></canvas>
+</div>
     <div class="bg-green-50 p-4 rounded-xl text-center">
         <span class="block text-2xl font-bold text-green-600" id="stats-today">0</span>
         <span class="text-xs text-green-400 uppercase font-bold">Przyjazdy 01.05</span>
@@ -126,6 +131,8 @@
     </div>
 
     <script>
+        let myChart = null; // Zmienna globalna do przechowywania instancji wykresu
+        
        // FUNKCJA PRZEŁĄCZANIA (MUSI BYĆ NA GÓRZE SKRYPTU)
         function showSection(id) {
             console.log("Przełączam na:", id);
@@ -212,43 +219,56 @@
     }).catch(err => alert("Błąd bazy: " + err.message));
 }
 
-        function loadData() {
-    // Referencja do miejsca w bazie, gdzie są zgłoszenia
+    
+
+function loadData() {
     db.ref('entries').on('value', (snapshot) => {
         const list = document.getElementById('list');
         const statsTotal = document.getElementById('stats-total');
         const statsToday = document.getElementById('stats-today');
         
-        // Czyścimy listę przed ponownym załadowaniem danych
         list.innerHTML = '';
         
-        // Zmienne pomocnicze do statystyk
         let countTotal = 0;
         let countMayFirst = 0;
 
-        // Sprawdzamy, czy w ogóle są jakieś dane
+        // Definiujemy zakres dni festiwalu dla wykresu
+        const festivalDays = ["26.04", "27.04", "28.04", "29.04", "30.04", "01.05", "02.05", "03.05", "04.05", "05.05", "06.05"];
+        let dailyCounts = {};
+        festivalDays.forEach(day => dailyCounts[day] = 0);
+
         if (!snapshot.exists()) {
             list.innerHTML = '<p class="text-gray-400 text-center italic py-4">Brak zarejestrowanych osób</p>';
             if(statsTotal) statsTotal.innerText = "0";
             if(statsToday) statsToday.innerText = "0";
+            if(myChart) myChart.destroy(); // Czyścimy wykres jeśli nie ma danych
             return;
         }
 
-        // Przechodzimy przez każde zgłoszenie (child) w bazie
         snapshot.forEach(child => {
             const data = child.val();
-            const id = child.key; // To jest nasze "Imię i Nazwisko"
+            const id = child.key;
 
-            // Logika statystyk
+            // 1. Logika Statystyk ogólnych
             countTotal++;
             if(data.arrivalDate === "01.05") {
                 countMayFirst++;
             }
 
-            // Tworzymy kartę uczestnika w HTML
-            // Wykorzystujemy klasy Tailwind dla ładnego wyglądu
+            // 2. Logika Wykresu (obliczanie obecności w każdym dniu)
+            const startIndex = festivalDays.indexOf(data.arrivalDate);
+            const endIndex = festivalDays.indexOf(data.departureDate);
+
+            if (startIndex !== -1 && endIndex !== -1) {
+                for (let i = startIndex; i <= endIndex; i++) {
+                    const currentDay = festivalDays[i];
+                    dailyCounts[currentDay]++;
+                }
+            }
+
+            // 3. Renderowanie Karty Uczestnika na liście
             list.innerHTML += `
-                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group mb-3">
                     <div class="flex flex-col">
                         <span class="text-gray-800 font-bold text-lg leading-tight">${id}</span>
                         <div class="flex items-center mt-1 space-x-2">
@@ -260,7 +280,6 @@
                             </span>
                         </div>
                     </div>
-                    
                     <button 
                         onclick="deleteEntry('${id}')" 
                         class="bg-white text-red-400 hover:text-red-600 hover:bg-red-50 border border-gray-200 p-2 rounded-lg transition-colors shadow-sm font-bold text-xs"
@@ -271,11 +290,59 @@
             `;
         });
 
-        // Aktualizujemy liczniki na górze panelu (jeśli istnieją w HTML)
+        // Aktualizacja liczników tekstowych
         if(statsTotal) statsTotal.innerText = countTotal;
         if(statsToday) statsToday.innerText = countMayFirst;
 
-        console.log("Dane załadowane pomyślnie. Łącznie osób:", countTotal);
+        // Wywołanie rysowania wykresu
+        renderChart(festivalDays, Object.values(dailyCounts));
+
+        console.log("Panel zaktualizowany. Łącznie osób:", countTotal);
+    });
+}
+
+// Funkcja pomocnicza do rysowania wykresu (Chart.js)
+function renderChart(labels, dataValues) {
+    const canvas = document.getElementById('occupancyChart');
+    if (!canvas) return; // Zabezpieczenie jeśli nie ma canvas w HTML
+    
+    const ctx = canvas.getContext('2d');
+    
+    if (myChart) {
+        myChart.destroy();
+    }
+
+    myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Osoby na miejscu',
+                data: dataValues,
+                backgroundColor: 'rgba(34, 197, 94, 0.5)', 
+                borderColor: 'rgb(34, 197, 94)',
+                borderWidth: 2,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // Pozwala lepiej kontrolować wysokość w CSS
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, color: '#9ca3af' },
+                    grid: { color: '#f3f4f6' }
+                },
+                x: {
+                    ticks: { color: '#9ca3af' },
+                    grid: { display: false }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
     });
 }
 

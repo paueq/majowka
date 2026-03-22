@@ -87,6 +87,12 @@
         <option value="06.05">06 maja (Środa)</option>
     </select>
 </div>
+                    <div class="mt-6">
+    <label class="block text-sm font-medium text-gray-700 mb-2 font-bold italic">Aktywności, które Cię interesują:</label>
+    <div id="activities-container" class="grid grid-cols-2 gap-2">
+        <p class="text-xs text-gray-400 italic">Ładowanie dostępnych aktywności...</p>
+    </div>
+</div>
                     <button onclick="sendData()" class="w-full bg-green-500 text-white py-3 rounded-xl font-bold hover:bg-green-600 transition shadow-md">
                         Wyślij zgłoszenie
                     </button>
@@ -121,6 +127,15 @@
         <span class="block text-2xl font-bold text-green-600" id="stats-today">0</span>
         <span class="text-xs text-green-400 uppercase font-bold">Przyjazdy 01.05</span>
     </div>
+</div>
+                    <div class="bg-gray-100 p-4 rounded-xl mb-6 border-2 border-dashed border-gray-300">
+    <h3 class="text-sm font-bold text-gray-700 mb-3">Zarządzaj Aktywnościami</h3>
+    <div class="flex gap-2 mb-3">
+        <input type="text" id="new-activity-name" class="flex-1 p-2 text-sm rounded-lg border" placeholder="Nazwa aktywności (np. Grill)">
+        <button onclick="addActivity()" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-bold shrink-0">DODAJ</button>
+    </div>
+    <div id="admin-activities-list" class="flex flex-wrap gap-2">
+        </div>
 </div>
                     <div class="flex justify-between items-center mb-6 border-b pb-4">
                         <h3 class="text-lg font-semibold text-gray-700">Zgłoszenia</h3>
@@ -191,6 +206,10 @@
     const name = document.getElementById('name').value;
     const arrival = document.getElementById('arrival-date').value;
     const departure = document.getElementById('departure-date').value;
+    const selectedActivities = [];
+    document.querySelectorAll('input[name="user-activity"]:checked').forEach(cb => {
+        selectedActivities.push(cb.value);
+    });
     
     if(!name) return alert("Wpisz imię!");
 
@@ -214,11 +233,13 @@
         name: name, 
         arrivalDate: arrival,
         departureDate: departure,
-        timestamp: Date.now() 
+        activities: selectedActivities, // Zapisujemy tablicę wybranych aktywności
+        timestamp: Date.now()
     })
     .then(() => {
         alert('Dziękujemy! Zgłoszenie zapisane pomyślnie.');
         document.getElementById('name').value = '';
+        document.querySelectorAll('input[name="user-activity"]').forEach(cb => cb.checked = false);
         showSection('home');
     }).catch(err => alert("Błąd bazy: " + err.message));
 }
@@ -252,6 +273,7 @@ function loadData() {
         snapshot.forEach(child => {
             const data = child.val();
             const id = child.key;
+            const acts = data.activities ? data.activities.join(', ') : 'Brak wybranych aktywności';
 
             // 1. Logika Statystyk ogólnych
             countTotal++;
@@ -282,6 +304,9 @@ function loadData() {
                             <span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
                                 Wyjazd: ${data.departureDate || '---'}
                             </span>
+                           <div class="mt-2 text-xs text-green-700 font-medium bg-green-50 p-2 rounded-lg border border-green-100">
+                <strong>Aktywności:</strong> ${acts}
+            </div> 
                         </div>
                     </div>
                     <button 
@@ -349,6 +374,63 @@ function renderChart(labels, dataValues) {
         }
     });
 }
+        // 1. Ładowanie aktywności do formularza i panelu admina
+function listenToActivities() {
+    db.ref('settings/activities').on('value', (snapshot) => {
+        const formContainer = document.getElementById('activities-container');
+        const adminList = document.getElementById('admin-activities-list');
+        
+        formContainer.innerHTML = '';
+        adminList.innerHTML = '';
+
+        if (!snapshot.exists()) {
+            formContainer.innerHTML = '<p class="text-xs text-gray-400">Brak zdefiniowanych aktywności.</p>';
+            return;
+        }
+
+        snapshot.forEach(child => {
+            const activity = child.val();
+            const activityId = child.key;
+
+            // Dodaj do FORMULARZA (Checkbox)
+            formContainer.innerHTML += `
+                <label class="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-white transition border border-transparent hover:border-gray-200 text-sm">
+                    <input type="checkbox" name="user-activity" value="${activity}" class="w-4 h-4 text-green-500 rounded focus:ring-green-500">
+                    <span>${activity}</span>
+                </label>
+            `;
+
+            // Dodaj do PANELU ADMINA (Tagi z "x")
+            adminList.innerHTML += `
+                <span class="bg-white border border-gray-300 px-2 py-1 rounded-md text-xs flex items-center gap-2 font-medium">
+                    ${activity}
+                    <button onclick="removeActivity('${activityId}')" class="text-red-500 font-bold hover:text-red-700">×</button>
+                </span>
+            `;
+        });
+    });
+}
+
+// 2. Dodawanie nowej aktywności przez Admina
+function addActivity() {
+    const input = document.getElementById('new-activity-name');
+    const val = input.value.trim();
+    if(!val) return;
+    
+    db.ref('settings/activities').push(val).then(() => {
+        input.value = '';
+    });
+}
+
+// 3. Usuwanie aktywności przez Admina
+function removeActivity(id) {
+    if(confirm('Usunąć tę aktywność z listy wyboru?')) {
+        db.ref('settings/activities/' + id).remove();
+    }
+}
+
+// UWAGA: Wywołaj listenToActivities() raz przy starcie aplikacji lub po zalogowaniu admina
+listenToActivities();
 
         function deleteEntry(key) {
             if(confirm('Usunąć ' + key + '?')) db.ref('entries/' + key).remove();

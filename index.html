@@ -1,130 +1,53 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <title>System Zgłoszeń</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Majówka 2026 - System Zgłoszeń</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+
     <style>
-        body { font-family: Arial; padding: 20px; }
+        body { font-family: 'Inter', sans-serif; }
+        .bg-majowka { background: linear-gradient(135deg, #6ee7b7 0%, #3b82f6 100%); }
         .hidden { display: none; }
-        .card { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 min-h-screen">
 
-    <div id="home">
-        <h1>Witaj w systemie</h1>
-        <button onclick="showSection('form-section')">Formularz zgłoszeniowy</button>
-        <button onclick="showSection('admin-section')">Panel Admina</button>
-    </div>
+    <nav class="bg-white shadow-sm p-4 mb-8">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-green-600 tracking-tight cursor-pointer" onclick="showSection('home')">🌸 Majówka 2026</h1>
+            <div class="space-x-4">
+                <button onclick="showSection('home')" class="text-gray-600 hover:text-green-600 font-medium">Start</button>
+                <button onclick="showSection('admin-section')" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-black transition">Panel Admina</button>
+            </div>
+        </div>
+    </nav>
 
-    <div id="form-section" class="hidden">
-        <h2>Formularz</h2>
-        <input type="text" id="name" placeholder="Imię i Nazwisko">
-        <button onclick="sendData()">Wyślij</button>
-        <button onclick="showSection('home')">Powrót</button>
-    </div>
+    <div class="max-w-2xl mx-auto px-4">
+        
+        <div id="home" class="text-center py-12">
+            <div class="bg-majowka p-10 rounded-3xl shadow-2xl mb-8">
+                <h2 class="text-4xl font-bold text-white mb-4">Witaj w systemie!</h2>
+                <p class="text-white opacity-90 mb-8 text-lg">Dołącz do uczestników tegorocznej Majówki. Rejestracja trwa kilka sekund.</p>
+                <button onclick="showSection('form-section')" class="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform shadow-lg">
+                    Otwórz formularz
+                </button>
+            </div>
+        </div>
 
-   <div id="admin-section" class="hidden">
-    <h2>Panel Admina</h2>
-    
-    <div id="admin-login-form">
-        <input type="email" id="admin-email" placeholder="Email admina">
-        <input type="password" id="admin-pass" placeholder="Hasło">
-        <button onclick="loginAdmin()">Zaloguj się</button>
-    </div>
-
-    <div id="admin-content" class="hidden">
-        <button onclick="logoutAdmin()">Wyloguj</button>
-        <h3>Wszystkie zgłoszenia</h3>
-        <div id="list"></div>
-    </div>
-    
-    <br>
-    <button onclick="showSection('home')">Powrót do strony głównej</button>
-</div>
-
-    <script>
-      // Konfiguracja (upewnij się, że masz tu poprawne dane ze swojej konsoli)
-const firebaseConfig = {
-  apiKey: "AIzaSyBfb2ZZVwFJsGisXCJi_NoCztqM9T-3jmo",
-  authDomain: "majowka-17460.firebaseapp.com",
-  databaseURL: "https://majowka-17460-default-rtdb.firebaseio.com",
-  projectId: "majowka-17460",
-  storageBucket: "majowka-17460.firebasestorage.app",
-  messagingSenderId: "782699449352",
-  appId: "1:782699449352:web:bf6f0a0a287ba45b3915bd",
-  measurementId: "G-TG5J9SRX0M"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const auth = firebase.auth(); // Inicjalizacja modułu logowania
-
-function showSection(id) {
-    document.querySelectorAll('body > div').forEach(d => d.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-    
-    // Jeśli wchodzimy do admina, sprawdzamy czy już jesteśmy zalogowani
-    if(id === 'admin-section') {
-        checkAuthState();
-    }
-}
-
-// Funkcja sprawdzająca stan zalogowania
-function checkAuthState() {
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            // Zalogowany - pokaż dane, ukryj login
-            document.getElementById('admin-login-form').classList.add('hidden');
-            document.getElementById('admin-content').classList.remove('hidden');
-            loadData();
-        } else {
-            // Niezalogowany - pokaż login, ukryj dane
-            document.getElementById('admin-login-form').classList.remove('hidden');
-            document.getElementById('admin-content').classList.add('hidden');
-        }
-    });
-}
-
-function loginAdmin() {
-    const email = document.getElementById('admin-email').value;
-    const pass = document.getElementById('admin-pass').value;
-
-    auth.signInWithEmailAndPassword(email, pass)
-        .catch(error => alert("Błąd: " + error.message));
-}
-
-function logoutAdmin() {
-    auth.signOut();
-}
-
-// Twoja funkcja zapisu (zmieniamy ID na Imię tak jak chciałeś)
-function sendData() {
-    const name = document.getElementById('name').value;
-    if(!name) return alert("Wpisz imię!");
-    
-    // Używamy .set() zamiast .push(), aby Imię było kluczem
-    db.ref('entries/' + name).set({
-        name: name,
-        timestamp: Date.now()
-    }).then(() => {
-        alert('Zgłoszenie wysłane!');
-        document.getElementById('name').value = '';
-        showSection('home');
-    });
-}
-
-function loadData() {
-    db.ref('entries').on('value', (snapshot) => {
-        const list = document.getElementById('list');
-        list.innerHTML = '';
-        snapshot.forEach(child => {
-            list.innerHTML += `<div class="card"><strong>ID:</strong> ${child.key}</div>`;
-        });
-    });
-}
-    </script>
-</body>
-</html>
+        <div id="form-section" class="hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">Formularz zgłoszeniowy</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Imię i Nazwisko</label>
+                        <input type="text" id="name" class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition" placeholder="np. Jan Kowalski">
+                    </div>
+                    <button onclick="sendData()" class="w-full bg-green-500 text-white py-3 rounded-xl font-bold hover:bg-green-600 transition shadow-md">
+                        Wyślij zgłoszenie

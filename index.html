@@ -289,27 +289,42 @@ function removeActivity(id) {
         db.ref('settings/activities/' + id).remove();
     }
 }
-        function listenToActivities() {
-            db.ref('settings/activities').on('value', (snapshot) => {
-                const container = document.getElementById('activities-container');
-                container.innerHTML = '';
-                snapshot.forEach(child => {
-                    const act = child.val();
-                    container.innerHTML += `<label class="flex items-center space-x-2 p-2 bg-gray-800/50 rounded-lg border border-gray-700 text-xs">
-                        <input type="checkbox" name="user-activity" value="${act}" class="accent-green-500">
-                        <span>${act}</span>
+      function listenToActivities() {
+    db.ref('settings/activities').on('value', (snapshot) => {
+        const container = document.getElementById('activities-container');
+        const adminList = document.getElementById('admin-activities-list');
+        
+        // Czyścimy oba kontenery przed dodaniem nowych danych
+        if (container) container.innerHTML = '';
+        if (adminList) adminList.innerHTML = '';
+
+        snapshot.forEach(child => {
+            const activityName = child.val();
+            const activityId = child.key;
+
+            // 1. Dodawanie do formularza zgłoszeń (checkboxy)
+            if (container) {
+                container.innerHTML += `
+                    <label class="flex items-center space-x-2 p-2 bg-gray-800/50 rounded-lg border border-gray-700 text-xs cursor-pointer hover:bg-gray-700 transition">
+                        <input type="checkbox" name="user-activity" value="${activityName}" class="accent-green-500">
+                        <span>${activityName}</span>
                     </label>`;
-                    adminList.innerHTML += `
-                <span class="bg-gray-800 text-white px-3 py-1.5 rounded-full text-xs flex items-center gap-2 border border-gray-600">
-                    ${activityName}
-                    <button onclick="removeActivity('${activityId}')" 
-                            class="text-red-400 hover:text-red-600 font-bold text-lg leading-none ml-1">
-                        &times;
-                    </button>
-                </span>`;
-                });
-            });
-        }
+            }
+
+            // 2. Dodawanie do panelu admina (tagi z przyciskiem X)
+            if (adminList) {
+                adminList.innerHTML += `
+                    <span class="bg-gray-800 text-white px-3 py-1.5 rounded-full text-xs flex items-center gap-2 border border-gray-600">
+                        ${activityName}
+                        <button onclick="removeActivity('${activityId}')" 
+                                class="text-red-400 hover:text-red-600 font-bold text-lg leading-none ml-1">
+                            &times;
+                        </button>
+                    </span>`;
+            }
+        });
+    });
+}
 
         // --- SLAJDY ---
         const slideshowImages = ['bg1.JPG', 'bg2.JPG', 'bg3.JPG', 'bg4.JPG', 'bg5.JPG', 'bg6.JPG', 'bg7.JPG', 'bg8.JPG', 'bg9.JPG'];

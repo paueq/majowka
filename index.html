@@ -16,6 +16,21 @@
         body { font-family: 'Inter', sans-serif; }
         .bg-majowka { background: linear-gradient(135deg, #6ee7b7 0%, #3b82f6 100%); }
         .hidden { display: none !important; }
+        .slide {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0; /* Domyślnie niewidoczne */
+        transition: opacity 1.5s ease-in-out; /* Efekt przenikania */
+        z-index: 0;
+    }
+
+    .slide.active {
+        opacity: 1; /* Widoczne */
+        z-index: 1; /* Na wierzchu */
+    }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -32,15 +47,25 @@
 
     <div class="max-w-2xl mx-auto px-4">
         
-        <div id="home" class="text-center py-12">
-            <div class="bg-majowka p-10 rounded-3xl shadow-2xl mb-8">
-                <h2 class="text-4xl font-bold text-white mb-4">Witaj w systemie!</h2>
-                <p class="text-white opacity-90 mb-8 text-lg">Dołącz do uczestników tegorocznej Majówki.</p>
-                <button onclick="showSection('form-section')" class="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform shadow-lg">
-                    Otwórz formularz
-                </button>
-            </div>
+        <div id="home" class="relative min-h-[80vh] flex items-center justify-center text-center overflow-hidden rounded-3xl shadow-2xl mb-8 mt-4 mx-4">
+    
+    <div id="slideshow-container" class="absolute inset-0 z-0">
         </div>
+
+    <div class="absolute inset-0 bg-black/50 z-10"></div>
+
+    <div class="relative z-20 p-10 max-w-xl mx-auto">
+        <h2 class="text-5xl font-extrabold text-white mb-6 tracking-tight leading-tight">
+            Witaj w systemie!
+        </h2>
+        <p class="text-white opacity-90 mb-10 text-xl font-medium">
+            Dołącz do uczestników tegorocznej Majówki. <br> Obejrzyj zdjęcia z zeszłego roku i zarejestruj się!
+        </p>
+        <button onclick="showSection('form-section')" class="bg-white text-blue-700 px-10 py-5 rounded-full font-bold text-xl hover:scale-105 transition-transform shadow-2xl hover:bg-green-50">
+            Otwórz formularz zgłoszeń
+        </button>
+    </div>
+</div>
 
         <div id="form-section" class="hidden">
             <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
@@ -435,6 +460,64 @@ listenToActivities();
         function deleteEntry(key) {
             if(confirm('Usunąć ' + key + '?')) db.ref('entries/' + key).remove();
         }
+        // --- KONFIGURACJA POKAZU SLAJDÓW ---
+
+// 1. Lista Twoich zdjęć (muszą być w tym samym folderze co index.html)
+const slideshowImages = [
+    'bg1.jpg', // Zmień na swoje nazwy plików
+    'bg2.jpg',
+    'bg3.jpg',
+    'bg4.jpg'
+];
+
+// 2. Czas wyświetlania jednego zdjęcia (w milisekundach), np. 5000 = 5 sekund
+const slideDuration = 5000; 
+
+let currentSlideIndex = 0;
+let slides = [];
+
+// Funkcja inicjalizująca pokaz slajdów
+function initSlideshow() {
+    const container = document.getElementById('slideshow-container');
+    if (!container || slideshowImages.length === 0) return;
+
+    // Tworzymy elementy HTML dla każdego zdjęcia
+    slideshowImages.forEach((imgUrl, index) => {
+        const slideDiv = document.createElement('div');
+        slideDiv.className = 'slide';
+        slideDiv.style.backgroundImage = `url('${imgUrl}')`;
+        
+        // Pierwsze zdjęcie ustawiamy jako aktywne od razu
+        if (index === 0) slideDiv.classList.add('active');
+        
+        container.appendChild(slideDiv);
+        slides.push(slideDiv);
+    });
+
+    // Uruchamiamy cykl przełączania, jeśli jest więcej niż 1 zdjęcie
+    if (slides.length > 1) {
+        setInterval(nextSlide, slideDuration);
+    }
+}
+
+// Funkcja przełączająca na następne zdjęcie
+function nextSlide() {
+    // Usuwamy klasę 'active' z obecnego slajdu
+    slides[currentSlideIndex].classList.remove('active');
+
+    // Obliczamy indeks następnego slajdu (z zapętleniem)
+    currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+
+    // Dodajemy klasę 'active' do nowego slajdu (zadziała transition CSS)
+    slides[currentSlideIndex].classList.add('active');
+}
+
+// --- URUCHOMIENIE ---
+// Wywołujemy inicjalizację po załadowaniu DOM
+document.addEventListener('DOMContentLoaded', () => {
+    // Zachowaj swoje inne wywołania, np. listenToActivities();
+    initSlideshow(); 
+});
         listenToActivities();
     </script>
 </body>

@@ -125,6 +125,12 @@
                     <p class="text-xs text-gray-500 italic">Ładowanie dostępnych aktywności...</p>
                 </div>
             </div>
+            <div class="mt-4">
+    <label class="block text-sm font-medium text-gray-400 mb-1">Twoje propozycje aktywności</label>
+    <textarea id="user-proposals" rows="3" 
+        class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-green-500 outline-none transition placeholder-gray-500" 
+        placeholder="Masz lepszy pomysł cwaniaczku? Napisz tutaj!"></textarea>
+</div>
 
             <button onclick="sendData()" 
                 class="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-500 transition shadow-lg mt-6">
@@ -242,6 +248,7 @@
     const name = document.getElementById('name').value;
     const arrival = document.getElementById('arrival-date').value;
     const departure = document.getElementById('departure-date').value;
+    const proposals = document.getElementById('user-proposals').value; // Pobieramy tekst
     const selectedActivities = [];
     document.querySelectorAll('input[name="user-activity"]:checked').forEach(cb => {
         selectedActivities.push(cb.value);
@@ -270,11 +277,13 @@
         arrivalDate: arrival,
         departureDate: departure,
         activities: selectedActivities, // Zapisujemy tablicę wybranych aktywności
+        userProposals: proposals, // Zapisujemy propozycje w bazie
         timestamp: Date.now()
     })
     .then(() => {
         alert('Dziękujemy! Zgłoszenie zapisane pomyślnie.');
         document.getElementById('name').value = '';
+        document.getElementById('user-proposals').value = ''; // Czyścimy pole
         document.querySelectorAll('input[name="user-activity"]').forEach(cb => cb.checked = false);
         showSection('home');
     }).catch(err => alert("Błąd bazy: " + err.message));
@@ -326,7 +335,8 @@ function loadData() {
                     const currentDay = festivalDays[i];
                     dailyCounts[currentDay]++;
                 }
-            }
+            
+            const userNotes = data.userProposals ? `<div class="mt-2 p-2 bg-blue-900/30 border border-blue-800 rounded-lg text-xs text-blue-200"><strong>Sugestie:</strong> ${data.userProposals}</div>` : '';
 
             // 3. Renderowanie Karty Uczestnika na liście
             list.innerHTML += `
@@ -343,6 +353,7 @@ function loadData() {
                            <div class="mt-2 text-xs text-green-700 font-medium bg-green-50 p-2 rounded-lg border border-green-100">
                 <strong>Aktywności:</strong> ${acts}
             </div> 
+            ${userNotes} </div>
                         </div>
                     </div>
                     <button 

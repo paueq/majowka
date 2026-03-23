@@ -13,244 +13,141 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-    /* Podstawowe style strony */
-    body { 
-        font-family: 'Inter', sans-serif; 
-        margin: 0;
-        overflow-x: hidden;
-    }
+        body { font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; background-color: black; }
+        .hidden { display: none !important; }
 
-    .hidden { display: none !important; }
+        /* POKAZ SLAJDÓW W TLE */
+        #slideshow-container {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-color: #000;
+        }
 
-    /* KONFIGURACJA TŁA (SLAJDÓW) */
-    #slideshow-container {
-        background-color: #000;
-        position: fixed; /* Tło zostaje w miejscu podczas przewijania */
-        inset: 0;
-        z-index: 0; /* Najniższa warstwa */
-    }
+        .slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
 
-    .slide {
-        position: absolute;
-        inset: 0;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        opacity: 0;
-        transition: opacity 1.5s ease-in-out;
-    }
+        .slide.active { opacity: 1; z-index: 1; }
 
-    .slide.active {
-        opacity: 1;
-        z-index: 1;
-    }
+        /* FILTR PRZYCIEMNIAJĄCY */
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 5;
+            pointer-events: none;
+        }
 
-    /* FILTR PRZYCIEMNIAJĄCY - nakładany na slajdy, by napisy były czytelne */
-    .bg-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.6); /* 60% czerni */
-        z-index: 5;
-        pointer-events: none;
-    }
-
-    /* STYLIZACJA SEKCJI (TREŚCI) */
-    #home, #form-section, #admin-section {
-        position: relative;
-        z-index: 10; /* Treść nad tłem */
-    }
-
-    /* Formularz - robimy go półprzezroczystym, by widzieć slajdy w tle */
-    #form-section > div {
-        background-color: rgba(17, 24, 39, 0.8) !important; /* Ciemny szary (gray-900) z 80% krycia */
-        backdrop-filter: blur(8px); /* Efekt rozmycia szkła za formularzem */
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        min-height: auto;
-    }
-
-    /* Fix dla widoku formularza na całej stronie */
-    #form-section {
-        min-height: 100vh;
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-    }
-
-    /* Nawigacja nad tłem */
-    nav {
-        position: relative;
-        z-index: 20;
-    }
-</style>
+        /* TREŚĆ NAD TŁEM */
+        .content-wrapper { position: relative; z-index: 10; }
+        
+        /* Przezroczyste karty */
+        .glass-card {
+            background-color: rgba(17, 24, 39, 0.7) !important;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
 </head>
-<body class="bg-black min-h-screen text-white relative">
+<body class="min-h-screen text-white relative">
     
     <div id="slideshow-container"></div>
-
     <div class="bg-overlay"></div>
 
-    <nav class="relative z-20 bg-white shadow-sm p-4 mb-8">
-
-    <nav class="bg-white shadow-sm p-4 mb-8">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-green-600 tracking-tight cursor-pointer" onclick="showSection('home')">Majówka 2026</h1>
-            <div class="space-x-4">
-                <button onclick="showSection('home')" class="text-gray-600 hover:text-green-600 font-medium">Główna</button>
-                <button onclick="showSection('admin-section')" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-black transition">Nie klikaj tu</button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="max-w-2xl mx-auto px-4">
-        
-       <div id="home" class="relative min-h-[80vh] flex items-center justify-center text-center overflow-hidden rounded-3xl mb-8 mt-4 mx-4">
-    
-    <div class="p-10 max-w-xl mx-auto">
-        <h2 class="text-5xl font-extrabold text-white mb-6 tracking-tight leading-tight">
-            HEJKA KOCHANI!
-        </h2>
-        <p class="text-white opacity-90 mb-10 text-xl font-medium">
-            Zapraszam na majóweczkę. <br> Zarejestruj się i wypełnij formularz :* .
-        </p>
-        <button onclick="showSection('form-section')" class="bg-white text-blue-700 px-10 py-5 rounded-full font-bold text-xl hover:scale-105 transition-transform shadow-2xl hover:bg-green-50">
-            Otwórz formularz zgłoszeń
-        </button>
-    </div>
-</div>
-
-       <div id="form-section" class="hidden">
-    <div class="bg-gray-900 p-8 rounded-2xl shadow-2xl border border-gray-800 text-white">
-        <h2 class="text-2xl font-bold mb-6 text-green-400">Formularz zgłoszeniowy</h2>
-        
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-400 mb-1">Imię i Nazwisko</label>
-                <input type="text" id="name" 
-                    class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-green-500 outline-none transition placeholder-gray-500" 
-                    placeholder="np. Jan Paweł II">
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-400 mb-1">Kiedy do nas dotrzesz?</label>
-                <select id="arrival-date" 
-                    class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-green-500 outline-none">
-                    <option value="26.04">26 kwietnia (Niedziela)</option>
-                    <option value="27.04">27 kwietnia (Poniedziałek)</option>
-                    <option value="28.04">28 kwietnia (Wtorek)</option>
-                    <option value="29.04">29 kwietnia (Środa)</option>
-                    <option value="30.04">30 kwietnia (Czwartek)</option>
-                    <option value="01.05">01 maja (Piątek - Majówka!)</option>
-                    <option value="02.05">02 maja (Sobota)</option>
-                    <option value="03.05">03 maja (Niedziela)</option>
-                    <option value="04.05">04 maja (Poniedziałek)</option>
-                    <option value="05.05">05 maja (Wtorek)</option>
-                    <option value="06.05">06 maja (Środa)</option>
-                </select>
-            </div>
-
-           <div class="mt-4">
-    <label class="block text-sm font-medium text-gray-400 mb-1">Kiedy nas opuszczasz?</label>
-    <select id="departure-date" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-red-400 outline-none">
-        <option value="26.04">26 kwietnia (Niedziela)</option>
-        <option value="27.04">27 kwietnia (Poniedziałek)</option>
-        <option value="28.04">28 kwietnia (Wtorek)</option>
-        <option value="29.04">29 kwietnia (Środa)</option>
-        <option value="30.04">30 kwietnia (Czwartek)</option>
-        <option value="01.05">01 maja (Piątek)</option>
-        <option value="02.05">02 maja (Sobota)</option>
-        <option value="03.05">03 maja (Niedziela)</option>
-        <option value="04.05">04 maja (Poniedziałek)</option>
-        <option value="05.05">05 maja (Wtorek)</option>
-        <option value="06.05">06 maja (Środa)</option>
-    </select>
-</div>
-
-            <div class="mt-6">
-                <label class="block text-sm font-medium text-gray-300 mb-2 font-bold italic">Aktywności, które Cię interesują:</label>
-                <div id="activities-container" class="grid grid-cols-2 gap-2 text-gray-300">
-                    <p class="text-xs text-gray-500 italic">Ładowanie dostępnych aktywności...</p>
+    <div class="content-wrapper">
+        <nav class="bg-black/30 backdrop-blur-md shadow-sm p-4 mb-8">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <h1 class="text-xl font-bold text-green-400 tracking-tight cursor-pointer" onclick="showSection('home')">Majówka 2026</h1>
+                <div class="space-x-4">
+                    <button onclick="showSection('home')" class="text-gray-200 hover:text-green-400 font-medium">Główna</button>
+                    <button onclick="showSection('admin-section')" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-black transition border border-gray-700">Admin</button>
                 </div>
             </div>
-            <div class="mt-4">
-    <label class="block text-sm font-medium text-gray-400 mb-1">Twoje propozycje aktywności</label>
-    <textarea id="user-proposals" rows="3" 
-        class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-green-500 outline-none transition placeholder-gray-500" 
-        placeholder="Masz lepszy pomysł cwaniaczku? Napisz tutaj!"></textarea>
-</div>
+        </nav>
 
-            <button onclick="sendData()" 
-                class="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-500 transition shadow-lg mt-6">
-                Wyślij zgłoszenie
-            </button>
-            <button onclick="showSection('home')" class="w-full text-gray-500 text-sm italic py-2 hover:text-gray-300">
-                Wróć
-            </button>
-        </div>
-    </div>
-</div>
+        <div class="max-w-2xl mx-auto px-4 pb-12">
+            
+            <div id="home" class="flex flex-col items-center justify-center text-center py-20">
+                <h2 class="text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-lg">HEJKA KOCHANI!</h2>
+                <p class="text-white text-xl mb-10 opacity-90">Zapraszam na majóweczkę. <br> Zarejestruj się i wypełnij formularz :*</p>
+                <button onclick="showSection('form-section')" class="bg-white text-blue-700 px-12 py-5 rounded-full font-bold text-xl hover:scale-105 transition-transform shadow-2xl">
+                    Otwórz formularz zgłoszeń
+                </button>
+            </div>
 
-       <div id="admin-section" class="hidden">
-    <div class="bg-gray-950 p-8 rounded-2xl shadow-sm border border-gray-800 text-white relative z-30">
-                <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">🔐 Panel Adasia, mówiłem nie wchodź!</h2>
-                <div id="admin-login-form" class="space-y-4">
-                    <input type="email" id="admin-email" class="w-full p-3 border rounded-xl" placeholder="Email">
-                    <input type="password" id="admin-pass" class="w-full p-3 border rounded-xl" placeholder="Hasło">
-                    <button onclick="loginAdmin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">Zaloguj się</button>
-                </div>
-                <div id="admin-content" class="hidden">
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-    <div class="bg-blue-50 p-4 rounded-xl text-center">
-        <span class="block text-2xl font-bold text-blue-600" id="stats-total">0</span>
-        <span class="text-xs text-blue-400 uppercase font-bold">Wszystkich osób</span>
-    </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
-    <h3 class="text-sm font-bold text-gray-500 uppercase mb-4 tracking-wider text-center">
-        Obłożenie festiwalu
-    </h3>
-    <div class="relative h-64 w-full">
-        <canvas id="occupancyChart"></canvas>
-    </div>
-</div>
-    <div class="bg-green-50 p-4 rounded-xl text-center">
-        <span class="block text-2xl font-bold text-green-600" id="stats-today">0</span>
-        <span class="text-xs text-green-400 uppercase font-bold">Przyjazdy 01.05</span>
-    </div>
-</div>
-                    <div class="bg-gray-100 p-4 rounded-xl mb-6 border-2 border-dashed border-gray-300">
-    <h3 class="text-sm font-bold text-gray-700 mb-3">Zarządzaj Aktywnościami</h3>
-    <div class="flex gap-2 mb-3">
-        <input type="text" id="new-activity-name" class="flex-1 p-2 text-sm rounded-lg border" placeholder="Nazwa aktywności (np. Grill)">
-        <button onclick="addActivity()" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-bold shrink-0">DODAJ</button>
-    </div>
-    <div id="admin-activities-list" class="flex flex-wrap gap-2">
-        </div>
-</div>
-                    <div class="flex justify-between items-center mb-6 border-b pb-4">
-                        <h3 class="text-lg font-semibold text-gray-700">Zgłoszenia</h3>
-                        <button onclick="logoutAdmin()" class="text-red-500 text-xs font-bold border border-red-200 px-2 py-1 rounded hover:bg-red-50">WYLOGUJ</button>
+            <div id="form-section" class="hidden">
+                <div class="glass-card p-8 rounded-3xl shadow-2xl">
+                    <h2 class="text-3xl font-bold mb-6 text-green-400">Formularz zgłoszeniowy</h2>
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Imię i Nazwisko</label>
+                            <input type="text" id="name" class="w-full p-4 bg-gray-900/50 border border-gray-700 rounded-2xl text-white focus:ring-2 focus:ring-green-500 outline-none" placeholder="np. Jan Paweł II">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Przyjazd</label>
+                                <select id="arrival-date" class="w-full p-4 bg-gray-900/50 border border-gray-700 rounded-2xl text-white outline-none">
+                                    <option value="26.04">26 kwietnia</option>
+                                    <option value="27.04">27 kwietnia</option>
+                                    <option value="28.04">28 kwietnia</option>
+                                    <option value="29.04">29 kwietnia</option>
+                                    <option value="30.04">30 kwietnia</option>
+                                    <option value="01.05">01 maja</option>
+                                    <option value="02.05">02 maja</option>
+                                    <option value="03.05">03 maja</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Wyjazd</label>
+                                <select id="departure-date" class="w-full p-4 bg-gray-900/50 border border-gray-700 rounded-2xl text-white outline-none">
+                                    <option value="26.04">26 kwietnia</option>
+                                    <option value="06.05">06 maja</option>
+                                    </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2 font-bold italic">Aktywności:</label>
+                            <div id="activities-container" class="grid grid-cols-2 gap-2"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Propozycje</label>
+                            <textarea id="user-proposals" rows="3" class="w-full p-4 bg-gray-900/50 border border-gray-700 rounded-2xl text-white outline-none" placeholder="Twoje pomysły..."></textarea>
+                        </div>
+                        <button onclick="sendData()" class="w-full bg-green-600 hover:bg-green-500 text-white py-5 rounded-2xl font-bold text-lg transition shadow-lg">Wyślij zgłoszenie</button>
+                        <button onclick="showSection('home')" class="w-full text-gray-400 text-sm py-2">Wróć</button>
                     </div>
-                    <div id="list" class="space-y-3"></div>
                 </div>
-                <button onclick="showSection('home')" class="w-full mt-6 text-gray-400 text-xs text-center">Powrót</button>
+            </div>
+
+            <div id="admin-section" class="hidden">
+                <div class="glass-card p-8 rounded-3xl">
+                    <h2 class="text-2xl font-bold mb-6 text-center text-red-400">🔐 Panel Admina</h2>
+                    <div id="admin-login-form" class="space-y-4">
+                        <input type="email" id="admin-email" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl" placeholder="Email">
+                        <input type="password" id="admin-pass" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl" placeholder="Hasło">
+                        <button onclick="loginAdmin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Zaloguj się</button>
+                    </div>
+                    <div id="admin-content" class="hidden">
+                        <div class="bg-white/10 p-4 rounded-2xl mb-6">
+                            <canvas id="occupancyChart" style="height:200px"></canvas>
+                        </div>
+                        <div id="list" class="space-y-3"></div>
+                        <button onclick="logoutAdmin()" class="w-full mt-6 text-red-400 font-bold">Wyloguj</button>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 
     <script>
-        let myChart = null; // Zmienna globalna do przechowywania instancji wykresu
-        
-       // FUNKCJA PRZEŁĄCZANIA (MUSI BYĆ NA GÓRZE SKRYPTU)
-        function showSection(id) {
-            console.log("Przełączam na:", id);
-            const sections = ['home', 'form-section', 'admin-section'];
-            sections.forEach(s => {
-                document.getElementById(s).classList.add('hidden');
-            });
-            document.getElementById(id).classList.remove('hidden');
-            if(id === 'admin-section') checkAuthState();
-        }
-
-        // TWOJA KONFIGURACJA FIREBASE
+        let myChart = null;
         const firebaseConfig = {
             apiKey: "AIzaSyBfb2ZZVwFJsGisXCJi_NoCztqM9T-3jmo",
             authDomain: "majowka-17460.firebaseapp.com",
@@ -266,332 +163,122 @@
         const db = firebase.database();
         const auth = firebase.auth();
 
+        function showSection(id) {
+            ['home', 'form-section', 'admin-section'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            if(id === 'admin-section') checkAuthState();
+        }
+
         function checkAuthState() {
             auth.onAuthStateChanged((user) => {
-                const loginForm = document.getElementById('admin-login-form');
-                const adminContent = document.getElementById('admin-content');
-                if (user) {
-                    loginForm.classList.add('hidden');
-                    adminContent.classList.remove('hidden');
-                    loadData();
-                } else {
-                    loginForm.classList.remove('hidden');
-                    adminContent.classList.add('hidden');
-                }
+                document.getElementById('admin-login-form').classList.toggle('hidden', !!user);
+                document.getElementById('admin-content').classList.toggle('hidden', !user);
+                if (user) loadData();
             });
         }
 
         function loginAdmin() {
             const email = document.getElementById('admin-email').value;
             const pass = document.getElementById('admin-pass').value;
-            auth.signInWithEmailAndPassword(email, pass).catch(err => alert("Błąd: " + err.message));
+            auth.signInWithEmailAndPassword(email, pass).catch(err => alert(err.message));
         }
 
         function logoutAdmin() { auth.signOut().then(() => showSection('home')); }
 
-      function sendData() {
-    const name = document.getElementById('name').value;
-    const arrival = document.getElementById('arrival-date').value;
-    const departure = document.getElementById('departure-date').value;
-    const proposals = document.getElementById('user-proposals').value; // Pobieramy tekst
-    const selectedActivities = [];
-    document.querySelectorAll('input[name="user-activity"]:checked').forEach(cb => {
-        selectedActivities.push(cb.value);
-    });
-    
-    if(!name) return alert("Wpisz imię!");
+        function sendData() {
+            const name = document.getElementById('name').value;
+            if(!name) return alert("Wpisz imię!");
+            
+            const arrival = document.getElementById('arrival-date').value;
+            const departure = document.getElementById('departure-date').value;
+            const proposals = document.getElementById('user-proposals').value;
+            const selectedActivities = Array.from(document.querySelectorAll('input[name="user-activity"]:checked')).map(cb => cb.value);
 
-    // Logika walidacji dat:
-    // Wyciągamy dzień i miesiąc, np. "26.04" -> dzień 26, miesiąc 04
-    const [dayArr, monthArr] = arrival.split('.').map(Number);
-    const [dayDep, monthDep] = departure.split('.').map(Number);
-
-    // Tworzymy proste porównanie (miesiąc * 100 + dzień) 
-    // np. 1 maja to 400 + 1 = 401, a 30 kwietnia to 300 + 30 = 330
-    const valArrival = monthArr * 100 + dayArr;
-    const valDeparture = monthDep * 100 + dayDep;
-
-    if (valDeparture < valArrival) {
-        alert("Błąd: Data wyjazdu nie może być wcześniejsza niż data przyjazdu!");
-        return; // Przerywamy wysyłanie
-    }
-
-    // Jeśli wszystko OK, wysyłamy do Firebase
-    db.ref('entries/' + name).set({ 
-        name: name, 
-        arrivalDate: arrival,
-        departureDate: departure,
-        activities: selectedActivities, // Zapisujemy tablicę wybranych aktywności
-        userProposals: proposals, // Zapisujemy propozycje w bazie
-        timestamp: Date.now()
-    })
-    .then(() => {
-        alert('Dziękujemy! Zgłoszenie zapisane pomyślnie.');
-        document.getElementById('name').value = '';
-        document.getElementById('user-proposals').value = ''; // Czyścimy pole
-        document.querySelectorAll('input[name="user-activity"]').forEach(cb => cb.checked = false);
-        showSection('home');
-    }).catch(err => alert("Błąd bazy: " + err.message));
-}
-
-    
-
-function loadData() {
-    db.ref('entries').on('value', (snapshot) => {
-        const list = document.getElementById('list');
-        const statsTotal = document.getElementById('stats-total');
-        const statsToday = document.getElementById('stats-today');
-        
-        list.innerHTML = '';
-        
-        let countTotal = 0;
-        let countMayFirst = 0;
-
-        // Definiujemy zakres dni festiwalu dla wykresu
-        const festivalDays = ["26.04", "27.04", "28.04", "29.04", "30.04", "01.05", "02.05", "03.05", "04.05", "05.05", "06.05"];
-        let dailyCounts = {};
-        festivalDays.forEach(day => dailyCounts[day] = 0);
-
-        if (!snapshot.exists()) {
-            list.innerHTML = '<p class="text-gray-400 text-center italic py-4">Brak zarejestrowanych osób</p>';
-            if(statsTotal) statsTotal.innerText = "0";
-            if(statsToday) statsToday.innerText = "0";
-            if(myChart) myChart.destroy(); // Czyścimy wykres jeśli nie ma danych
-            return;
+            db.ref('entries/' + name).set({
+                name, arrivalDate: arrival, departureDate: departure, activities: selectedActivities, userProposals: proposals, timestamp: Date.now()
+            }).then(() => {
+                alert('Zapisano!');
+                showSection('home');
+            });
         }
 
-        snapshot.forEach(child => {
-            const data = child.val();
-            const id = child.key;
-            const acts = data.activities ? data.activities.join(', ') : 'Brak wybranych aktywności';
+        function loadData() {
+            db.ref('entries').on('value', (snapshot) => {
+                const list = document.getElementById('list');
+                list.innerHTML = '';
+                const festivalDays = ["26.04", "27.04", "28.04", "29.04", "30.04", "01.05", "02.05", "03.05", "04.05", "05.05", "06.05"];
+                let dailyCounts = {}; festivalDays.forEach(d => dailyCounts[d] = 0);
 
-            // 1. Logika Statystyk ogólnych
-            countTotal++;
-            if(data.arrivalDate === "01.05") {
-                countMayFirst++;
-            }
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    const start = festivalDays.indexOf(data.arrivalDate);
+                    const end = festivalDays.indexOf(data.departureDate);
+                    if(start !== -1 && end !== -1) {
+                        for(let i=start; i<=end; i++) dailyCounts[festivalDays[i]]++;
+                    }
+                    list.innerHTML += `<div class="p-3 bg-white/5 rounded-xl border border-white/10 mb-2">
+                        <p class="font-bold">${child.key}</p>
+                        <p class="text-xs text-gray-400">${data.arrivalDate} - ${data.departureDate}</p>
+                    </div>`;
+                });
+                renderChart(festivalDays, Object.values(dailyCounts));
+            });
+        }
 
-            // 2. Logika Wykresu (obliczanie obecności w każdym dniu)
-            const startIndex = festivalDays.indexOf(data.arrivalDate);
-            const endIndex = festivalDays.indexOf(data.departureDate);
-
-            if (startIndex !== -1 && endIndex !== -1) {
-                for (let i = startIndex; i <= endIndex; i++) {
-                    const currentDay = festivalDays[i];
-                    dailyCounts[currentDay]++;
-                }
-            }
-            const userNotes = data.userProposals ? `<div class="mt-2 p-2 bg-blue-900/30 border border-blue-800 rounded-lg text-xs text-blue-200"><strong>Sugestie:</strong> ${data.userProposals}</div>` : '';
-
-            // 3. Renderowanie Karty Uczestnika na liście
-            list.innerHTML += `
-                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group mb-3">
-                    <div class="flex flex-col">
-                        <span class="text-gray-800 font-bold text-lg leading-tight">${id}</span>
-                        <div class="flex items-center mt-1 space-x-2">
-                            <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-                                Przyjazd: ${data.arrivalDate || '---'}
-                            </span>
-                            <span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-                                Wyjazd: ${data.departureDate || '---'}
-                            </span>
-                           <div class="mt-2 text-xs text-green-700 font-medium bg-green-50 p-2 rounded-lg border border-green-100">
-                <strong>Aktywności:</strong> ${acts}
-            </div> 
-            ${userNotes} </div>
-                        </div>
-                    </div>
-                    <button 
-                        onclick="deleteEntry('${id}')" 
-                        class="bg-white text-red-400 hover:text-red-600 hover:bg-red-50 border border-gray-200 p-2 rounded-lg transition-colors shadow-sm font-bold text-xs"
-                    >
-                        USUŃ
-                    </button>
-                </div>
-            `;
-        });
-
-        // Aktualizacja liczników tekstowych
-        if(statsTotal) statsTotal.innerText = countTotal;
-        if(statsToday) statsToday.innerText = countMayFirst;
-
-        // Wywołanie rysowania wykresu
-        renderChart(festivalDays, Object.values(dailyCounts));
-
-        console.log("Panel zaktualizowany. Łącznie osób:", countTotal);
-    });
-}
-
-// Funkcja pomocnicza do rysowania wykresu (Chart.js)
-function renderChart(labels, dataValues) {
-    const canvas = document.getElementById('occupancyChart');
-    if (!canvas) return; // Zabezpieczenie jeśli nie ma canvas w HTML
-    
-    const ctx = canvas.getContext('2d');
-    
-    if (myChart) {
-        myChart.destroy();
-    }
-
-    myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Osoby na miejscu',
-                data: dataValues,
-                backgroundColor: 'rgba(34, 197, 94, 0.5)', 
-                borderColor: 'rgb(34, 197, 94)',
-                borderWidth: 2,
-                borderRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false, // Pozwala lepiej kontrolować wysokość w CSS
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1, color: '#9ca3af' },
-                    grid: { color: '#f3f4f6' }
+        function renderChart(labels, dataValues) {
+            const ctx = document.getElementById('occupancyChart').getContext('2d');
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{ label: 'Osoby', data: dataValues, backgroundColor: '#22c55e' }]
                 },
-                x: {
-                    ticks: { color: '#9ca3af' },
-                    grid: { display: false }
-                }
-            },
-            plugins: {
-                legend: { display: false }
-            }
-        }
-    });
-}
-        // 1. Ładowanie aktywności do formularza i panelu admina
-function listenToActivities() {
-    db.ref('settings/activities').on('value', (snapshot) => {
-        const formContainer = document.getElementById('activities-container');
-        const adminList = document.getElementById('admin-activities-list');
-        
-        formContainer.innerHTML = '';
-        adminList.innerHTML = '';
-
-        if (!snapshot.exists()) {
-            formContainer.innerHTML = '<p class="text-xs text-gray-400">Brak zdefiniowanych aktywności.</p>';
-            return;
+                options: { responsive: true, maintainAspectRatio: false }
+            });
         }
 
-        snapshot.forEach(child => {
-            const activity = child.val();
-            const activityId = child.key;
+        function listenToActivities() {
+            db.ref('settings/activities').on('value', (snapshot) => {
+                const container = document.getElementById('activities-container');
+                container.innerHTML = '';
+                snapshot.forEach(child => {
+                    const act = child.val();
+                    container.innerHTML += `<label class="flex items-center space-x-2 p-2 bg-gray-800/50 rounded-lg border border-gray-700 text-xs">
+                        <input type="checkbox" name="user-activity" value="${act}" class="accent-green-500">
+                        <span>${act}</span>
+                    </label>`;
+                });
+            });
+        }
 
-            // Dodaj do FORMULARZA (Checkbox)
-            formContainer.innerHTML += `
-    <label class="flex items-center space-x-2 p-2 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition border border-gray-700 text-sm">
-        <input type="checkbox" name="user-activity" value="${activity}" class="w-4 h-4 text-green-500 rounded bg-gray-900 border-gray-600">
-        <span class="text-gray-200">${activity}</span>
-    </label>
-`;
+        // --- SLAJDY ---
+        const slideshowImages = ['bg1.JPG', 'bg2.JPG', 'bg3.JPG', 'bg4.JPG', 'bg5.JPG', 'bg6.JPG', 'bg7.JPG', 'bg8.JPG', 'bg9.JPG'];
+        let currentSlideIndex = 0;
+        let slides = [];
 
-            // Dodaj do PANELU ADMINA (Tagi z "x")
-            adminList.innerHTML += `
-                <span class="bg-white border border-gray-300 px-2 py-1 rounded-md text-xs flex items-center gap-2 font-medium">
-                    ${activity}
-                    <button onclick="removeActivity('${activityId}')" class="text-red-500 font-bold hover:text-red-700">×</button>
-                </span>
-            `;
+        function initSlideshow() {
+            const container = document.getElementById('slideshow-container');
+            slideshowImages.forEach((url, i) => {
+                const div = document.createElement('div');
+                div.className = 'slide' + (i === 0 ? ' active' : '');
+                div.style.backgroundImage = `url('${url}')`;
+                container.appendChild(div);
+                slides.push(div);
+            });
+            if(slides.length > 1) setInterval(nextSlide, 5000);
+        }
+
+        function nextSlide() {
+            slides[currentSlideIndex].classList.remove('active');
+            currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+            slides[currentSlideIndex].classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initSlideshow();
+            listenToActivities();
         });
-    });
-}
-
-// 2. Dodawanie nowej aktywności przez Admina
-function addActivity() {
-    const input = document.getElementById('new-activity-name');
-    const val = input.value.trim();
-    if(!val) return;
-    
-    db.ref('settings/activities').push(val).then(() => {
-        input.value = '';
-    });
-}
-
-// 3. Usuwanie aktywności przez Admina
-function removeActivity(id) {
-    if(confirm('Usunąć tę aktywność z listy wyboru?')) {
-        db.ref('settings/activities/' + id).remove();
-    }
-}
-
-// UWAGA: Wywołaj listenToActivities() raz przy starcie aplikacji lub po zalogowaniu admina
-listenToActivities();
-
-        function deleteEntry(key) {
-            if(confirm('Usunąć ' + key + '?')) db.ref('entries/' + key).remove();
-        }
-        // --- KONFIGURACJA POKAZU SLAJDÓW ---
-
-// 1. Lista Twoich zdjęć (muszą być w tym samym folderze co index.html)
-const slideshowImages = [
-    'bg1.JPG', // Zmień na swoje nazwy plików
-    'bg2.JPG',
-    'bg3.JPG',
-    'bg4.JPG',
-    'bg5.JPG',
-    'bg6.JPG',
-    'bg7.JPG',
-    'bg8.JPG',
-    'bg9.JPG'
-];
-
-// 2. Czas wyświetlania jednego zdjęcia (w milisekundach), np. 5000 = 5 sekund
-const slideDuration = 5000; 
-
-let currentSlideIndex = 0;
-let slides = [];
-
-// Funkcja inicjalizująca pokaz slajdów
-function initSlideshow() {
-    const container = document.getElementById('slideshow-container');
-    if (!container || slideshowImages.length === 0) return;
-
-    // Tworzymy elementy HTML dla każdego zdjęcia
-    slideshowImages.forEach((imgUrl, index) => {
-        const slideDiv = document.createElement('div');
-        slideDiv.className = 'slide';
-        slideDiv.style.backgroundImage = `url('${imgUrl}')`;
-        
-        // Pierwsze zdjęcie ustawiamy jako aktywne od razu
-        if (index === 0) slideDiv.classList.add('active');
-        
-        container.appendChild(slideDiv);
-        slides.push(slideDiv);
-    });
-
-    // Uruchamiamy cykl przełączania, jeśli jest więcej niż 1 zdjęcie
-    if (slides.length > 1) {
-        setInterval(nextSlide, slideDuration);
-    }
-}
-
-// Funkcja przełączająca na następne zdjęcie
-function nextSlide() {
-    // Usuwamy klasę 'active' z obecnego slajdu
-    slides[currentSlideIndex].classList.remove('active');
-
-    // Obliczamy indeks następnego slajdu (z zapętleniem)
-    currentSlideIndex = (currentSlideIndex + 1) % slides.length;
-
-    // Dodajemy klasę 'active' do nowego slajdu (zadziała transition CSS)
-    slides[currentSlideIndex].classList.add('active');
-}
-
-// --- URUCHOMIENIE ---
-// Wywołujemy inicjalizację po załadowaniu DOM
-document.addEventListener('DOMContentLoaded', () => {
-    // Zachowaj swoje inne wywołania, np. listenToActivities();
-    initSlideshow(); 
-});
-        listenToActivities();
-        initSlideshow();
     </script>
 </body>
 </html>

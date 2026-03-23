@@ -31,6 +31,11 @@
         opacity: 1; /* Widoczne */
         z-index: 1; /* Na wierzchu */
     }
+        #form-section {
+    background-color: #000; /* Głęboka czerń wokół karty formularza */
+    min-height: 100vh;
+    padding-top: 2rem;
+}
     </style>
 </head>
 <body class="bg-black min-h-screen text-white">
@@ -97,14 +102,22 @@
                 </select>
             </div>
 
-            <div class="mt-4">
-                <label class="block text-sm font-medium text-gray-400 mb-1">Kiedy nas opuszczasz?</label>
-                <select id="departure-date" 
-                    class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-red-400 outline-none">
-                    <option value="26.04">26 kwietnia</option>
-                    <option value="06.05">06 maja</option>
-                </select>
-            </div>
+           <div class="mt-4">
+    <label class="block text-sm font-medium text-gray-400 mb-1">Kiedy nas opuszczasz?</label>
+    <select id="departure-date" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:ring-2 focus:ring-red-400 outline-none">
+        <option value="26.04">26 kwietnia (Niedziela)</option>
+        <option value="27.04">27 kwietnia (Poniedziałek)</option>
+        <option value="28.04">28 kwietnia (Wtorek)</option>
+        <option value="29.04">29 kwietnia (Środa)</option>
+        <option value="30.04">30 kwietnia (Czwartek)</option>
+        <option value="01.05">01 maja (Piątek)</option>
+        <option value="02.05">02 maja (Sobota)</option>
+        <option value="03.05">03 maja (Niedziela)</option>
+        <option value="04.05">04 maja (Poniedziałek)</option>
+        <option value="05.05">05 maja (Wtorek)</option>
+        <option value="06.05">06 maja (Środa)</option>
+    </select>
+</div>
 
             <div class="mt-6">
                 <label class="block text-sm font-medium text-gray-300 mb-2 font-bold italic">Aktywności, które Cię interesują:</label>
@@ -417,11 +430,11 @@ function listenToActivities() {
 
             // Dodaj do FORMULARZA (Checkbox)
             formContainer.innerHTML += `
-                <label class="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-white transition border border-transparent hover:border-gray-200 text-sm">
-                    <input type="checkbox" name="user-activity" value="${activity}" class="w-4 h-4 text-green-500 rounded focus:ring-green-500">
-                    <span>${activity}</span>
-                </label>
-            `;
+    <label class="flex items-center space-x-2 p-2 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition border border-gray-700 text-sm">
+        <input type="checkbox" name="user-activity" value="${activity}" class="w-4 h-4 text-green-500 rounded bg-gray-900 border-gray-600">
+        <span class="text-gray-200">${activity}</span>
+    </label>
+`;
 
             // Dodaj do PANELU ADMINA (Tagi z "x")
             adminList.innerHTML += `

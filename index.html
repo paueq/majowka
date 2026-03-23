@@ -75,10 +75,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Imię i Nazwisko</label>
                         <input type="text" id="name" class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition" placeholder="np. Jan Kowalski">
                     </div>
-                    <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Imię i Nazwisko</label>
-    <input type="text" id="name" class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition" placeholder="np. Jan Kowalski">
-</div>
+                
 
 <div>
     <label class="block text-sm font-medium text-gray-700 mb-1">Kiedy do nas dotrzesz?</label>
@@ -464,10 +461,15 @@ listenToActivities();
 
 // 1. Lista Twoich zdjęć (muszą być w tym samym folderze co index.html)
 const slideshowImages = [
-    'bg1.jpg', // Zmień na swoje nazwy plików
-    'bg2.jpg',
-    'bg3.jpg',
-    'bg4.jpg'
+    'bg1.JPG', // Zmień na swoje nazwy plików
+    'bg2.JPG',
+    'bg3.JPG',
+    'bg4.JPG',
+    'bg5.JPG',
+    'bg6.JPG',
+    'bg7.JPG',
+    'bg8.JPG',
+    'bg9.JPG'
 ];
 
 // 2. Czas wyświetlania jednego zdjęcia (w milisekundach), np. 5000 = 5 sekund
@@ -519,6 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSlideshow(); 
 });
         listenToActivities();
+        initSlideshow();
     </script>
 </body>
 </html>

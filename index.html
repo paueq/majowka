@@ -13,37 +13,83 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .bg-majowka { background: linear-gradient(135deg, #6ee7b7 0%, #3b82f6 100%); }
-        .hidden { display: none !important; }
-        .slide {
+    /* Podstawowe style strony */
+    body { 
+        font-family: 'Inter', sans-serif; 
+        margin: 0;
+        overflow-x: hidden;
+    }
+
+    .hidden { display: none !important; }
+
+    /* KONFIGURACJA TŁA (SLAJDÓW) */
+    #slideshow-container {
+        background-color: #000;
+        position: fixed; /* Tło zostaje w miejscu podczas przewijania */
+        inset: 0;
+        z-index: 0; /* Najniższa warstwa */
+    }
+
+    .slide {
         position: absolute;
         inset: 0;
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        opacity: 0; /* Domyślnie niewidoczne */
-        transition: opacity 1.5s ease-in-out; /* Efekt przenikania */
-        z-index: 0;
+        opacity: 0;
+        transition: opacity 1.5s ease-in-out;
     }
 
     .slide.active {
-        opacity: 1; /* Widoczne */
-        z-index: 1; /* Na wierzchu */
+        opacity: 1;
+        z-index: 1;
     }
-        #form-section {
-    background-color: #000; /* Głęboka czerń wokół karty formularza */
-    min-height: 100vh;
-    padding-top: 2rem;
-}
-        #slideshow-container {
-    background-color: #000;
-    position: absolute;
-    inset: 0;
-}
-    </style>
+
+    /* FILTR PRZYCIEMNIAJĄCY - nakładany na slajdy, by napisy były czytelne */
+    .bg-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6); /* 60% czerni */
+        z-index: 5;
+        pointer-events: none;
+    }
+
+    /* STYLIZACJA SEKCJI (TREŚCI) */
+    #home, #form-section, #admin-section {
+        position: relative;
+        z-index: 10; /* Treść nad tłem */
+    }
+
+    /* Formularz - robimy go półprzezroczystym, by widzieć slajdy w tle */
+    #form-section > div {
+        background-color: rgba(17, 24, 39, 0.8) !important; /* Ciemny szary (gray-900) z 80% krycia */
+        backdrop-filter: blur(8px); /* Efekt rozmycia szkła za formularzem */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        min-height: auto;
+    }
+
+    /* Fix dla widoku formularza na całej stronie */
+    #form-section {
+        min-height: 100vh;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    /* Nawigacja nad tłem */
+    nav {
+        position: relative;
+        z-index: 20;
+    }
+</style>
 </head>
-<body class="bg-black min-h-screen text-white">
+<body class="bg-black min-h-screen text-white relative">
+    
+    <div id="slideshow-container" class="fixed inset-0 z-0 bg-black">
+        </div>
+
+    <div class="fixed inset-0 bg-black/60 z-10 pointer-events-none"></div>
+
+    <nav class="relative z-20 bg-white shadow-sm p-4 mb-8">
 
     <nav class="bg-white shadow-sm p-4 mb-8">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
@@ -57,14 +103,9 @@
 
     <div class="max-w-2xl mx-auto px-4">
         
-        <div id="home" class="relative min-h-[80vh] flex items-center justify-center text-center overflow-hidden rounded-3xl shadow-2xl mb-8 mt-4 mx-4">
+       <div id="home" class="relative min-h-[80vh] flex items-center justify-center text-center overflow-hidden rounded-3xl mb-8 mt-4 mx-4">
     
-    <div id="slideshow-container" class="absolute inset-0 z-0">
-        </div>
-
-    <div class="absolute inset-0 bg-black/50 z-10"></div>
-
-    <div class="relative z-20 p-10 max-w-xl mx-auto">
+    <div class="p-10 max-w-xl mx-auto">
         <h2 class="text-5xl font-extrabold text-white mb-6 tracking-tight leading-tight">
             HEJKA KOCHANI!
         </h2>
@@ -148,8 +189,8 @@
     </div>
 </div>
 
-        <div id="admin-section" class="hidden">
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+       <div id="admin-section" class="hidden">
+    <div class="bg-gray-950 p-8 rounded-2xl shadow-sm border border-gray-800 text-white relative z-30">
                 <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">🔐 Panel Adasia, mówiłem nie wchodź!</h2>
                 <div id="admin-login-form" class="space-y-4">
                     <input type="email" id="admin-email" class="w-full p-3 border rounded-xl" placeholder="Email">

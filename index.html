@@ -87,7 +87,7 @@
                     <h2 class="text-3xl font-bold mb-6 text-green-400">Formularz zgłoszeniowy</h2>
                     <div class="space-y-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Imię i Nazwisko</label>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Kto pyta?</label>
                             <input type="text" id="name" class="w-full p-4 bg-gray-900/50 border border-gray-700 rounded-2xl text-white focus:ring-2 focus:ring-green-500 outline-none" placeholder="np. Jan Paweł II">
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -108,6 +108,15 @@
                                 <label class="block text-sm font-medium text-gray-300 mb-1">Wyjazd</label>
                                 <select id="departure-date" class="w-full p-4 bg-gray-900/50 border border-gray-700 rounded-2xl text-white outline-none">
                                     <option value="26.04">26 kwietnia</option>
+                                    <option value="27.04">27 kwietnia</option>
+                                    <option value="28.04">28 kwietnia</option>
+                                    <option value="29.04">29 kwietnia</option>
+                                    <option value="30.04">30 kwietnia</option>
+                                    <option value="01.05">01 maja</option>
+                                    <option value="02.05">02 maja</option>
+                                    <option value="03.05">03 maja</option>
+                                    <option value="04.05">02 maja</option>
+                                    <option value="05.05">03 maja</option>
                                     <option value="06.05">06 maja</option>
                                     </select>
                             </div>
@@ -121,6 +130,19 @@
                                 <option value="od 10 osób">Od 10 osób</option>
                         </select>
                         </div>
+                            <div class="mt-4">
+    <label class="block text-sm font-medium text-gray-300 mb-2">Czy składasz się w razie czego na dodatkowe mieszkanie?</label>
+    <div class="flex gap-4">
+        <label class="flex-1">
+            <input type="radio" name="extra-payment" value="Tak" class="hidden peer" checked>
+            <div class="p-3 text-center bg-gray-900/50 border border-gray-700 rounded-xl cursor-pointer peer-checked:border-green-500 peer-checked:bg-green-500/20 transition">Tak</div>
+        </label>
+        <label class="flex-1">
+            <input type="radio" name="extra-payment" value="Nie" class="hidden peer">
+            <div class="p-3 text-center bg-gray-900/50 border border-gray-700 rounded-xl cursor-pointer peer-checked:border-red-500 peer-checked:bg-red-500/20 transition">Nie</div>
+        </label>
+    </div>
+</div>
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2 font-bold italic">Aktywności:</label>
                             <div id="activities-container" class="grid grid-cols-2 gap-2"></div>
@@ -219,11 +241,12 @@
             const arrival = document.getElementById('arrival-date').value;
             const departure = document.getElementById('departure-date').value;
             const apartmentOpinion = document.getElementById('second-apartment-opinion').value;
+            const extraPayment = document.querySelector('input[name="extra-payment"]:checked').value;
             const proposals = document.getElementById('user-proposals').value;
             const selectedActivities = Array.from(document.querySelectorAll('input[name="user-activity"]:checked')).map(cb => cb.value);
 
             db.ref('entries/' + name).set({
-                name, arrivalDate: arrival, departureDate: departure,secondApartmentOpinion: apartmentOpinion, activities: selectedActivities, userProposals: proposals, timestamp: Date.now()
+                name, arrivalDate: arrival, departureDate: departure,secondApartmentOpinion: apartmentOpinion, extraPayment: extraPayment, activities: selectedActivities, userProposals: proposals, timestamp: Date.now()
             }).then(() => {
                 alert('Zapisano!');
                 showSection('home');
@@ -249,6 +272,12 @@
         <div>
             <p class="font-bold text-lg">${child.key}</p>
             <p class="text-xs text-gray-400">${data.arrivalDate} - ${data.departureDate}</p>
+           <div class="flex gap-2 mt-1">
+                <span class="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded">Mieszkanie: ${data.secondApartmentOpinion || '?'}</span>
+                <span class="text-[10px] ${data.extraPayment === 'Tak' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'} px-2 py-0.5 rounded">
+                    Składka: ${data.extraPayment || 'Nieokreślone'}
+                </span>
+            </div>
             <p class="text-[10px] text-green-500 mt-1 italic">${data.activities ? data.activities.join(', ') : 'Brak'}</p>
         </div>
         <button onclick="deleteEntry('${child.key}')" class="bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white px-3 py-1 rounded-lg text-xs font-bold transition">

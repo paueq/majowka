@@ -187,7 +187,13 @@
                     <input type="text" id="new-activity-name" class="flex-1 p-3 bg-gray-900/50 border border-gray-700 rounded-xl text-sm" placeholder="Nowa aktywność (np. Planszówki)">
                     <button onclick="addActivity()" class="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-xl text-xs font-bold transition">DODAJ</button>
                 </div>
-                    <div class="bg-white/5 p-6 rounded-2xl border border-white/10 mt-6">
+               
+                <div id="admin-activities-list" class="flex flex-wrap gap-2">
+                    </div>
+                    
+            </div>
+
+                     <div class="bg-white/5 p-6 rounded-2xl border border-white/10 mt-6">
     <h3 class="text-sm font-bold text-gray-400 uppercase mb-4 tracking-wider text-orange-400">Zarządzaj Opcjami Jedzenia</h3>
     <div class="flex gap-2 mb-4">
         <input type="text" id="new-food-name" class="flex-1 p-3 bg-gray-900/50 border border-gray-700 rounded-xl text-sm text-white" placeholder="Nowa opcja (np. Wege)">
@@ -195,10 +201,6 @@
     </div>
     <div id="admin-food-list" class="flex flex-wrap gap-2"></div>
 </div>
-                <div id="admin-activities-list" class="flex flex-wrap gap-2">
-                    </div>
-            </div>
-
             <div class="bg-white/10 p-4 rounded-2xl">
                 <canvas id="occupancyChart" style="height:200px"></canvas>
             </div>

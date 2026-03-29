@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
@@ -113,6 +113,15 @@
                             </div>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Od ilu osób uczestniczących powinniśmy wynająć drugie mieszkanie?</label>
+                            <select id="second-apartment-opinion" class="w-full p-4 bg-gray-900/50 border border-gray-700 rounded-2xl text-white outline-none focus:ring-2 focus:ring-green-500">
+                                <option value="nigdy">Nigdy</option>
+                                <option value="od 6 osób">Od 6 osób</option>
+                                <option value="od 8 osób">Od 8 osób</option>
+                                <option value="od 10 osób">Od 10 osób</option>
+                        </select>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-300 mb-2 font-bold italic">Aktywności:</label>
                             <div id="activities-container" class="grid grid-cols-2 gap-2"></div>
                         </div>
@@ -209,11 +218,12 @@
             
             const arrival = document.getElementById('arrival-date').value;
             const departure = document.getElementById('departure-date').value;
+            const apartmentOpinion = document.getElementById('second-apartment-opinion').value;
             const proposals = document.getElementById('user-proposals').value;
             const selectedActivities = Array.from(document.querySelectorAll('input[name="user-activity"]:checked')).map(cb => cb.value);
 
             db.ref('entries/' + name).set({
-                name, arrivalDate: arrival, departureDate: departure, activities: selectedActivities, userProposals: proposals, timestamp: Date.now()
+                name, arrivalDate: arrival, departureDate: departure,secondApartmentOpinion: apartmentOpinion, activities: selectedActivities, userProposals: proposals, timestamp: Date.now()
             }).then(() => {
                 alert('Zapisano!');
                 showSection('home');

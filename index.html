@@ -204,6 +204,21 @@
             <div class="bg-white/10 p-4 rounded-2xl">
                 <canvas id="occupancyChart" style="height:200px"></canvas>
             </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+    <div class="bg-white/5 p-6 rounded-2xl border border-green-500/30">
+        <h3 class="text-lg font-bold text-green-400 mb-4 uppercase tracking-wider">🏆 Ranking Aktywności</h3>
+        <div id="stats-activities-ranking" class="space-y-2 mb-4"></div>
+        <h4 class="text-sm font-semibold text-gray-400 mb-2">Dodatkowe pomysły:</h4>
+        <div id="stats-activities-proposals" class="text-xs bg-black/40 p-3 rounded-lg max-h-32 overflow-y-auto italic text-gray-300"></div>
+    </div>
+
+    <div class="bg-white/5 p-6 rounded-2xl border border-orange-500/30">
+        <h3 class="text-lg font-bold text-orange-400 mb-4 uppercase tracking-wider">🍴 Ranking Jedzenia</h3>
+        <div id="stats-food-ranking" class="space-y-2 mb-4"></div>
+        <h4 class="text-sm font-semibold text-gray-400 mb-2">Dodatkowe zachcianki:</h4>
+        <div id="stats-food-proposals" class="text-xs bg-black/40 p-3 rounded-lg max-h-32 overflow-y-auto italic text-gray-300"></div>
+    </div>
+</div>
 
             <div>
                 <h3 class="text-lg font-bold mb-4 text-green-400">Lista Uczestników</h3>
@@ -275,14 +290,64 @@ userFoodProposals: foodProposals, timestamp: Date.now()
                 showSection('home');
             });
         }
+        function generateStatistics(entries) {
+    const activityCounts = {};
+    const foodCounts = {};
+    const activityProposals = [];
+    const foodProposals = [];
+
+    // Przetwarzanie danych
+    Object.values(entries).forEach(entry => {
+        // Liczenie aktywności
+        if (entry.activities) {
+            entry.activities.forEach(act => {
+                activityCounts[act] = (activityCounts[act] || 0) + 1;
+            });
+        }
+        // Liczenie jedzenia
+        if (entry.food) {
+            entry.food.forEach(f => {
+                foodCounts[f] = (foodCounts[f] || 0) + 1;
+            });
+        }
+        // Kolekcjonowanie propozycji tekstowych
+        if (entry.userProposals) activityProposals.push(`${entry.name}: ${entry.userProposals}`);
+        if (entry.userFoodProposals) foodProposals.push(`${entry.name}: ${entry.userFoodProposals}`);
+    });
+
+    // Funkcja pomocnicza do renderowania rankingu (sortowanie od max do min)
+    const renderRanking = (countsObj, containerId, colorClass) => {
+        const container = document.getElementById(containerId);
+        const sorted = Object.entries(countsObj).sort((a, b) => b[1] - a[1]);
+        
+        container.innerHTML = sorted.map(([name, count]) => `
+            <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg">
+                <span class="text-sm">${name}</span>
+                <span class="font-bold ${colorClass}">${count} głosy</span>
+            </div>
+        `).join('') || '<p class="text-gray-500 text-xs">Brak głosów</p>';
+    };
+
+    // Renderowanie wyników
+    renderRanking(activityCounts, 'stats-activities-ranking', 'text-green-400');
+    renderRanking(foodCounts, 'stats-food-ranking', 'text-orange-400');
+
+    // Renderowanie propozycji tekstowych
+    document.getElementById('stats-activities-proposals').innerHTML = 
+        activityProposals.length ? activityProposals.join('<br><hr class="border-white/5 my-1">') : 'Brak dodatkowych propozycji';
+    
+    document.getElementById('stats-food-proposals').innerHTML = 
+        foodProposals.length ? foodProposals.join('<br><hr class="border-white/5 my-1">') : 'Brak dodatkowych propozycji';
+}
 
         function loadData() {
             db.ref('entries').on('value', (snapshot) => {
+                const entries = snapshot.val() || {};
                 const list = document.getElementById('list');
                 list.innerHTML = '';
                 const festivalDays = ["26.04", "27.04", "28.04", "29.04", "30.04", "01.05", "02.05", "03.05", "04.05", "05.05", "06.05"];
                 let dailyCounts = {}; festivalDays.forEach(d => dailyCounts[d] = 0);
-
+                generateStatistics(entries);
                 snapshot.forEach(child => {
                     const data = child.val();
                     const start = festivalDays.indexOf(data.arrivalDate);
